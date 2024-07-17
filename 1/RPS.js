@@ -7,17 +7,39 @@ function createPlayer() {
     possibleMoves: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
     madeMoves: [],
     score: 0,
-  }
+    WINMOVES: {
+      rock: ['scissors', 'lizard'],
+      scissors: ['lizard', 'paper'],
+      paper: ['rock', 'spock'],
+      spock: ['rock', 'scissors'],
+      lizard: ['spock', 'paper'],
+    },
+  };
+
 }
 
 function createComputer() {
   let playerObj = createPlayer();
   let computerObj = {
-
     choose() {
-      let numberOfChoices = this.possibleMoves.length;
-      let randomInt = Math.floor(Math.random() * numberOfChoices);
-      this.move = this.possibleMoves[randomInt];
+      const humanMoves = RPSGame.human.madeMoves;
+
+      //find the humans most commonly made move
+      const mostCommon = Array.from(new Set(humanMoves)).reduce((prev, curr) => {
+        let currMoreCommon = humanMoves.filter(el => el === curr).length >
+          humanMoves.filter(el => el === prev);
+        return currMoreCommon ? curr : prev;
+      }
+      );
+
+      //calculate a random move
+      do {
+        let randomInt = Math.floor(Math.random() * this.possibleMoves.length);
+        this.move = this.possibleMoves[randomInt];
+        //keep trying moves until one beats the humans most common move
+      } while (!this.WINMOVES[this.move].includes(mostCommon) &&
+        humanMoves.length >= 2);
+
       this.madeMoves.push(this.move);
     }
   };
@@ -48,14 +70,21 @@ const RPSGame = {
   pointsPerMatch: null,
   human: createHuman(),
   computer: createComputer(),
+  WINMOVES: {
+    rock: ['scissors', 'lizard'],
+    scissors: ['lizard', 'paper'],
+    paper: ['rock', 'spock'],
+    spock: ['rock', 'scissors'],
+    lizard: ['spock', 'paper'],
+  },
 
   displayWelcome() {
     console.clear();
     console.log(MESSAGES.welcome);
 
-    let points = readline.question(MESSAGES.promptPoints)
+    let points = readline.question(MESSAGES.promptPoints);
     while (points < 1 || points > 20 || !Number.isInteger(Number(points))) {
-      points = readline.question(messages.promptPointsError)
+      points = readline.question(MESSAGES.promptPointsError);
     }
     this.pointsPerMatch = points;
   },
@@ -65,42 +94,34 @@ const RPSGame = {
   },
 
   displayWinner() {
-
-    const WINMOVES = {
-      rock: ['scissors', 'lizard'],
-      scissors: ['lizard', 'paper'],
-      paper: ['rock', 'spock'],
-      spock: ['rock', 'scissors'],
-      lizard: ['spock', 'paper'],
-    };
-
     console.log(`You Chose: ${this.human.move}.`);
     console.log(`The Computer Chose: ${this.computer.move}`);
 
-    if (WINMOVES[this.human.move].includes(this.computer.move)) {
+    if (this.WINMOVES[this.human.move].includes(this.computer.move)) {
       console.log(`${this.human.move} beats ${this.computer.move}! You win!`);
       this.human.score += 1;
-    }
-    else if (WINMOVES[this.computer.move].includes(this.human.move)) {
+
+    } else if (this.WINMOVES[this.computer.move].includes(this.human.move)) {
       console.log(`${this.computer.move} beats ${this.human.move}! You Loose!!!! haha`);
       this.computer.score += 1;
-    }
-    else if (this.human.move === this.computer.move) {
+
+    } else if (this.human.move === this.computer.move) {
       console.log(MESSAGES.tie);
+
     }
     this.displayScore();
   },
 
   matchOver() {
-    return (this.human.score >= this.pointsPerMatch || this.computer.score >= this.pointsPerMatch);
+    return (this.human.score >= this.pointsPerMatch
+      || this.computer.score >= this.pointsPerMatch);
   },
 
   displayScore() {
-    console.log('');
-    console.log(`The ${this.matchOver() ? 'final' : ''} score is:`)
+    console.log(`\nThe ${this.matchOver() ? 'final' : ''} score is:`);
     console.log(`Human: ${this.human.score}`);
     console.log(`Computer: ${this.computer.score}`);
-    console.log(`Playing to: ${this.pointsPerMatch}`);
+    console.log(`Playing to: ${this.pointsPerMatch}\n`);
   },
 
   displayFinalWinner() {
@@ -117,13 +138,13 @@ const RPSGame = {
   },
 
   playAgain() {
-    if (this.computer.score >= this.pointsPerMatch || this.human.score >= this.pointsPerMatch) {
-      return false;
-    }
+    if (this.matchOver()) return false;
+
     let response = readline.question(MESSAGES.promptPlayAgain);
     while (response !== 'y' && response !== 'n' && response !== '') {
       response = readline.question(MESSAGES.promptPlayAgainError);
     }
+
     return (response === 'y' || response === '');
   },
 
@@ -145,3 +166,4 @@ const RPSGame = {
 
 
 RPSGame.play();
+
