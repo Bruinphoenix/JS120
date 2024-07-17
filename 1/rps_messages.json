@@ -1,0 +1,14 @@
+{
+  "welcome": "Welcome to Rock, Paper, Scissors, Lizard, Spock!",
+  "promptPoints": "How many points would you like to play to (1-20): ",
+  "promptPointsError": "That is not valid. Please choose a number of points to play to between 1 & 20.",
+  "chooseMove": "Please choose a move: ",
+  "chooseMoveError": "That was not a valid choice: please type rock, paper, scissors, lizard, or spock: ",
+  "goodbye": "Thank you for playing Rock, Paper, Scissors, Lizard, Spock! GoodBye!",
+  "promptPlayAgain": "Would you like to play the next match?\nHit enter or 'y' to play. 'n' to exit ",
+  "promptPlayAgainError": "That is not a valid responce please select 'y' or 'n': ",
+  "tie": "It's a tie!",
+  "playerWin": "You win the match!",
+  "computerWin": "The computer wins the match! Better luch next time...",
+  "incompleteMatch": "You ended the match before anybody won..."
+}

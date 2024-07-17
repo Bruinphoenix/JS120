@@ -1,79 +1,130 @@
 const readline = require('readline-sync');
+const MESSAGES = require('./rps_messages.json');
+
+function createPlayer() {
+  return {
+    move: null,
+    possibleMoves: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
+    madeMoves: [],
+    score: 0,
+  }
+}
 
 function createComputer() {
-  return {
-    lastMove: null,
-    possibleMoves: ['rock', 'paper', 'scissors'],
+  let playerObj = createPlayer();
+  let computerObj = {
 
     choose() {
-      let randomInt = Math.floor(Math.random() * 3);
-      this.lastMove = this.possibleMoves[randomInt];
+      let numberOfChoices = this.possibleMoves.length;
+      let randomInt = Math.floor(Math.random() * numberOfChoices);
+      this.move = this.possibleMoves[randomInt];
+      this.madeMoves.push(this.move);
     }
   };
+  return Object.assign(playerObj, computerObj);
 }
 
 function createHuman() {
-  return {
-    lastMove: null,
-    possibleMoves: ['rock', 'paper', 'scissors'],
+  let playerObj = createPlayer();
 
+  let humanObj = {
     choose() {
-      let choice = readline.question('Please choose a move: ');
+      console.clear();
+      let choice = readline.question(MESSAGES.chooseMove);
 
       while (!this.possibleMoves.includes(choice)) {
-        choice = readline.question('That was not a valid choice: please choose rock, paper, or scissors. ');
+        choice = readline.question(MESSAGES.chooseMoveError);
       }
 
-      this.lastMove = choice;
+      this.move = choice;
+      this.madeMoves.push(choice);
     }
   };
+
+  return Object.assign(playerObj, humanObj);
 }
 
 const RPSGame = {
-  gamesPerMatch: null,
+  pointsPerMatch: null,
   human: createHuman(),
   computer: createComputer(),
 
   displayWelcome() {
-    console.log('Welcome to Rock, Paper, Scissors!');
+    console.clear();
+    console.log(MESSAGES.welcome);
 
-    let matches = readline.question('How many matches would you like to play (1-20)')
-    while (matches < 1 || matches > 20 || !Number.isInteger(matches)) {
-      matches = readline.question('That is not valid. Please choose a number of matches to play between 1 & 20.')
+    let points = readline.question(MESSAGES.promptPoints)
+    while (points < 1 || points > 20 || !Number.isInteger(Number(points))) {
+      points = readline.question(messages.promptPointsError)
     }
-    this.gamesPerMatch = matches;
+    this.pointsPerMatch = points;
   },
 
   displayGoodbye() {
-    console.log('Thank you for playing Rock, Paper, Scissors! GoodBye!');
+    console.log(MESSAGES.goodbye);
   },
 
   displayWinner() {
 
     const WINMOVES = {
-      rock: 'scissors',
-      scissors: 'paper',
-      paper: 'rock'
+      rock: ['scissors', 'lizard'],
+      scissors: ['lizard', 'paper'],
+      paper: ['rock', 'spock'],
+      spock: ['rock', 'scissors'],
+      lizard: ['spock', 'paper'],
     };
-    console.log(`You Chose: ${this.human.lastMove}.`);
-    console.log(`The Computer Chose: ${this.computer.lastMove}`);
 
-    if (WINMOVES[this.human.lastMove] === this.computer.lastMove) {
-      console.log(`${this.human.lastMove} beats ${this.computer.lastMove}! You win!`);
-    } else if (WINMOVES[this.computer.lastMove] === this.human.lastMove) {
-      console.log(`${this.computer.lastMove} beats ${this.human.lastMove}! You Loose!!!! haha`);
-    } else if (this.human.lastMove === this.computer.lastMove) {
-      console.log('its a tie!');
+    console.log(`You Chose: ${this.human.move}.`);
+    console.log(`The Computer Chose: ${this.computer.move}`);
+
+    if (WINMOVES[this.human.move].includes(this.computer.move)) {
+      console.log(`${this.human.move} beats ${this.computer.move}! You win!`);
+      this.human.score += 1;
+    }
+    else if (WINMOVES[this.computer.move].includes(this.human.move)) {
+      console.log(`${this.computer.move} beats ${this.human.move}! You Loose!!!! haha`);
+      this.computer.score += 1;
+    }
+    else if (this.human.move === this.computer.move) {
+      console.log(MESSAGES.tie);
+    }
+    this.displayScore();
+  },
+
+  matchOver() {
+    return (this.human.score >= this.pointsPerMatch || this.computer.score >= this.pointsPerMatch);
+  },
+
+  displayScore() {
+    console.log('');
+    console.log(`The ${this.matchOver() ? 'final' : ''} score is:`)
+    console.log(`Human: ${this.human.score}`);
+    console.log(`Computer: ${this.computer.score}`);
+    console.log(`Playing to: ${this.pointsPerMatch}`);
+  },
+
+  displayFinalWinner() {
+    console.clear();
+    if (this.human.score >= this.pointsPerMatch) {
+      console.log(MESSAGES.playerWin);
+    } else if (this.computer.score >= this.pointsPerMatch) {
+      console.log(MESSAGES.computerWin);
+    } else {
+      console.log(MESSAGES.incompleteMatch);
     }
 
+    this.displayScore();
   },
 
   playAgain() {
-    let response = readline.question('Would you like to play again? y/n: ');
-    while (response !== 'y' && response !== 'n') {
-      response = readline.question('That is not a valid responce please select "y" or "n".');
+    if (this.computer.score >= this.pointsPerMatch || this.human.score >= this.pointsPerMatch) {
+      return false;
     }
-    return response === 'y';
+    let response = readline.question(MESSAGES.promptPlayAgain);
+    while (response !== 'y' && response !== 'n' && response !== '') {
+      response = readline.question(MESSAGES.promptPlayAgainError);
+    }
+    return (response === 'y' || response === '');
   },
 
   play() {
@@ -86,6 +137,7 @@ const RPSGame = {
         break;
       }
     }
+    this.displayFinalWinner();
     this.displayGoodbye();
   },
 
