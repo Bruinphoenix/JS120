@@ -165,5 +165,5 @@ const RPSGame = {
 };
 
 
-RPSGame.play();
-
+//RPSGame.play();
+console.log(global)

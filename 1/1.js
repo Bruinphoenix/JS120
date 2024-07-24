@@ -1,20 +1,29 @@
-function CreateBook(title, author, read = false) {
-  return {
-    title: title,
-    author: author,
-    read: read,
-
-
-    getDescription() {
-      console.log(`${this.title} was written by ${this.author}. I ${this.read ? 'have' : 'haven\'t'} read it.`);
-    },
-
-    readBook() {
-      this.read = true;
-    },
-  }
+function Pokemon(name, type, evolutionStage) {
+  this.name = name;
+  this.type = type;
+  this.evolutionStage = evolutionStage;
 }
 
-let book = CreateBook('me talk pretty one day', 'David Sedaris');
+Pokemon.prototype.isType = function (type) {
+  return this.type === type;
+}
 
-book.getDescription();
+
+let pokemonCards = {
+  collection: [],
+  add(name, type, evolutionStage) {
+    let pokemon = new Pokemon(name, type, evolutionStage);
+    this.collection.push(pokemon);
+  },
+  getUnevolved() {
+    return this.collection.filter(pokemon => pokemon.evolutionStage === 1);
+  },
+  filterByType(type) {
+    return this.collection.filter(pokemon => pokemon.isType(type));
+  },
+};
+
+pokemonCards.add('char', 'dog', 1);
+pokemonCards.add('me', 'ghd', 3);
+
+console.log(pokemonCards.filterByType('dog'));
